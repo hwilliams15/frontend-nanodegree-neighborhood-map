@@ -1,0 +1,31 @@
+{
+  "name": "frontend-nanodegree-neighborhood-map",
+  "version": "1.0.0",
+  "description": "Udacity Frontend Nanodegree Neighborhood Map project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hwilliams15/frontend-nanodegree-neighborhood-map.git"
+  },
+  "keywords": [
+    "Udacity",
+    "nanodegree",
+    "neighborhod",
+    "map"
+  ],
+  "author": "Holly Williams",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hwilliams15/frontend-nanodegree-neighborhood-map/issues"
+  },
+  "homepage": "https://github.com/hwilliams15/frontend-nanodegree-neighborhood-map#readme",
+  "devDependencies": {
+    "bootstrap": "^3.3.7",
+    "jquery": "^3.1.1",
+    "knockout": "^3.4.0",
+    "uglify": "^0.1.5"
+  }
+}
