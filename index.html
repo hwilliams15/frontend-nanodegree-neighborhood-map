@@ -31,7 +31,14 @@
       </ul>
     </div>
     <div class="right">
-      <div class="header"><span class="glyphicon glyphicon-menu-hamburger hamburger"></span></div>
+      <div class="header">
+        <span class="glyphicon glyphicon-menu-hamburger hamburger"></span>
+        <div class="input-group mobile-filter-input-group">
+          <input type="text" class="form-control filter-input" placeholder="Search the locations."
+            data-bind="textInput: filterText, event: { keyup: filterLocations}">
+            <span class="input-group-addon glyphicon glyphicon-filter filter-span"></span>
+        </div>
+      </div>
       <div id="map"></div>
     </div>
   </div>

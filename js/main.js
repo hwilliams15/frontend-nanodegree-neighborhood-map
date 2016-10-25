@@ -101,6 +101,14 @@ function createMarkers(locations,map){
     content: 'This is an info window.'
   });
 
+  var markerImage = new google.maps.MarkerImage(
+    'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ 'FFFF24'+
+    '|40|_|%E2%80%A2',
+    new google.maps.Size(21, 34),
+    new google.maps.Point(0, 0),
+    new google.maps.Point(10, 34),
+    new google.maps.Size(21,34));
+
   for (var i = 0; i < locations.length; i++) {
     // Get the position from the location array.
     var position = locations[i].location;
@@ -111,7 +119,8 @@ function createMarkers(locations,map){
       title: title,
       animation: google.maps.Animation.DROP,
       id: i,
-      map: map
+      map: map,
+      icon: markerImage
     });
 
     marker.location = locations[i];
@@ -164,15 +173,15 @@ function populateInfoWindow(location, infoWindow) {
         var panorama = new google.maps.StreetViewPanorama(
           document.getElementById('pano'), panoramaOptions);
       } else {
-        // infoWindow.setContent('<div>' + marker.title + '</div>' +
-        //   '<div>No Street View Found</div>');
+        $("#pano").html("<div>No Street View Found</div>");
       }
     }
     // Use streetview service to get the closest streetview image within
     // 50 meters of the markers position
     streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
     // Open the infoWindow on the correct marker.
-    retrieveWikiInfo(location,infoWindow);
+    // retrieveWikiInfo(location,infoWindow);
+    getFlickerInfo(location,infoWindow);
     infoWindow.open(map, marker);
   }
 }
@@ -197,19 +206,21 @@ function retrieveWikiInfo(location,infoWindow){
         headers: { 'Api-User-Agent': 'Example/1.0' },
         success: function(data) {
           var id = Object.keys(data.query.pages)[0];
-          location.wikiContent = '<div>' + location.title + '</div>';
+          location.wikiContent = '<div>' + location.title + '</div><div id="pano"></div>';
           if(id!=null){
             var summary = data.query.pages[id].extract;
             if(summary!=null){
                location.wikiContent = '<div>' + location.title + '</div>'+
+               '<div id="pano"></div>'+
                '<div>'+summary+'</div>';
                infoWindow.setContent(location.wikiContent);
             }
           }
         },
         error: function(){
-          location.wikiContent = '<div>' + marker.title +
-            '</div><div>Unable to load Wikipedia content</div>';
+          location.wikiContent = '<div>' + marker.title + '</div>';
+            '<div id="pano"></div>'+
+            '<div>Unable to load Wikipedia content</div>';
           infoWindow.setContent(location.wikiContent);
         }
     } );
@@ -219,7 +230,47 @@ function retrieveWikiInfo(location,infoWindow){
   }
 }
 
-$('.hamburger').click(function(){
-  $('.list-view').toggleClass('open');
-  $('.right').toggleClass('shift');
-})
+var hamburger = $('.hamburger');
+var listView = $('.list-view');
+var rightContent = $('.right');
+var mobileFilter = $('.mobile-filter-input-group');
+
+hamburger.on("click",function(){
+  listView.toggleClass('open');
+  rightContent.toggleClass('minimized');
+  mobileFilter.toggleClass('visible');
+});
+
+function getFlickerInfo(location,infoWindow){
+
+  var queryTag = location.title;
+  var flickerURL = "https://api.flickr.com/services/rest/?method=flickr.photos.search"
+  +"&api_key=8343a630cdd7b965cf0cf265fb93fe0b&tags="+queryTag+"&per_page=10&page=1&"+
+  "format=json&nojsoncallback=1";
+
+  $.ajax( {
+      url: flickerURL,
+      dataType: 'json',
+      type: 'POST',
+      success: function(data) {
+        var imgSrc = getImageURL(data);
+        infoWindow.setContent("<img src="+imgSrc+" style='width:200px;'>");
+      },
+      error: function(){
+        location.wikiContent = '<div>' + marker.title + '</div>';
+          '<div id="pano"></div>'+
+          '<div>Unable to load Wikipedia content</div>';
+        infoWindow.setContent(location.wikiContent);
+      }
+  } );
+
+}
+function getImageURL(data){
+  var photo = data.photos.photo[0];
+  var farm = photo.farm;
+  var server = photo.server;
+  var id = photo.id;
+  var secret=photo.secret;
+  var imageURL = "https://farm"+farm+".staticflickr.com/"+server+"/"+id+"_"+secret+".jpg";
+  return imageURL;
+}
