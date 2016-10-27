@@ -1,12 +1,9 @@
 function AppViewModel() {
   var self = this;
   self.filterText = ko.observable();
-  self.hamburger = $('.hamburger');
   self.listView = $('.list-view');
   self.rightContent = $('.right');
   self.mobileFilter = $('.mobile-filter-input-group');
-  self.mobileCenterMapButton = $('.right .center-map-button');
-  self.listCenterMapButton = $('.list-view .center-map-button');
 
   self.interestingPoints = ko.observableArray([{
     'title': 'Central Park',
@@ -94,20 +91,20 @@ function AppViewModel() {
   Decide which locations should be visible based on the filter text.
   Also filter the markers on the map.
   */
-  self.filterLocations = function() {
-    self.infoWindow.close();
-    var listElems = $('.list-elem');
-    var list = self.interestingPoints();
-    for (var i = 0; i < list.length; i++) {
-      if (list[i].title.toLowerCase().indexOf(self.filterText().toLowerCase()) < 0) {
-        listElems[i].style.display = 'none';
-        list[i].marker.setMap(null);
-      } else {
-        listElems[i].style.display = 'block';
-        list[i].marker.setMap(self.map);
-      }
+  self.filterLocations = ko.computed(function() {
+    var filter = this.filterText();
+    if (typeof filter == 'undefined') {
+      return this.interestingPoints();
+    } else {
+      return ko.utils.arrayFilter(this.interestingPoints(), function(location) {
+        var containsFilterVal = location.title.toLowerCase().indexOf(filter.toLowerCase()) >= 0;
+        if (location.marker) {
+          location.marker.setVisible(containsFilterVal);
+        }
+        return containsFilterVal;
+      });
     }
-  };
+  }, self);
 
   /*
   Animate the marker and display the info for the location
@@ -121,12 +118,18 @@ function AppViewModel() {
     self.adjustListView();
   };
 
-  /*
-  Create the markers for the view model's list of locations
-  */
-  self.createMarkers = function(locations) {
+  self.setupMap = function() {
 
-    var bounds = new google.maps.LatLngBounds();
+    //create the map
+    self.map = new google.maps.Map(document.getElementById('map'), {
+      center: {
+        lat: 40.782824,
+        lng: -73.965570
+      },
+      zoom: 25,
+      styles: styles
+    });
+
     self.infoWindow = new google.maps.InfoWindow({
       content: 'This is an info window.'
     });
@@ -138,12 +141,25 @@ function AppViewModel() {
 
     //close the info window if the user clicks on the map
     self.map.addListener('click', function() {
-      if (self.infoWindow.map != null) {
+      if (self.infoWindow.map !== null) {
         self.infoWindow.marker = null;
         self.infoWindow.close();
       }
     });
 
+    self.createMarkers(self.interestingPoints());
+
+    window.onresize = self.fitBounds;
+
+  };
+  /*
+  Create the markers for the view model's list of locations
+  */
+  self.createMarkers = function(locations) {
+
+    var bounds = new google.maps.LatLngBounds();
+
+    //creates a yellow marker image
     var markerImage = new google.maps.MarkerImage(
       'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|' + 'FFFF24' +
       '|40|_|%E2%80%A2',
@@ -152,6 +168,7 @@ function AppViewModel() {
       new google.maps.Point(10, 34),
       new google.maps.Size(21, 34));
 
+    //create markers for each location
     for (var i = 0; i < locations.length; i++) {
       var position = locations[i].location;
       var title = locations[i].title;
@@ -170,6 +187,7 @@ function AppViewModel() {
       //when the marker is clicked animate with bounce
       //and stop the bouncing animation later
       marker.addListener('click', function() {
+        self.map.panTo(this.getPosition());
         this.setAnimation(google.maps.Animation.BOUNCE);
         (function(marker) {
           setTimeout(function() {
@@ -215,26 +233,23 @@ function AppViewModel() {
       $.ajax({
         url: queryURL,
         dataType: 'jsonp',
-        type: 'POST',
-        headers: {
-          'Api-User-Agent': 'Example/1.0'
-        },
+        type: 'GET',
         success: function(data) {
-          var id = Object.keys(data.query.pages)[0];
-          location.wikiContent = '<div>' + location.title + '</div><div id="pano"></div>';
-          if (id != null) {
+          location.wikiContent = 'Unable to load Wikipedia content.';
+          try {
+            var id = Object.keys(data.query.pages)[0];
             var summary = data.query.pages[id].extract;
-            if (summary != null) {
+            if (summary !== null && typeof summary !== 'undefined') {
               location.wikiContent = summary;
-              $('#wiki-content').text(location.wikiContent);
-
             }
+          } catch (e) {
+            location.wikiContent = 'Unable to load Wikipedia content';
           }
+          $('#wiki-content').text(location.wikiContent);
         },
         error: function() {
-          location.wikiContent = 'Unable to load Wikipedia content.';
+          location.wikiContent = 'Unable to load Wikipedia content';
           $('#wiki-content').text(location.wikiContent);
-
         }
       });
     } else {
@@ -302,35 +317,22 @@ function AppViewModel() {
     self.map.fitBounds(self.bounds);
   };
 
-  self.hamburger.on('click', self.adjustListView);
-  self.mobileCenterMapButton.on('click', self.fitBounds);
-
-  self.listCenterMapButton.on('click', function() {
+  self.fitBoundsAndCloseListView = function() {
     self.fitBounds();
     self.adjustListView();
-  });
+  };
 }
-
-// Activates knockout.js
-var viewModel = new AppViewModel();
-ko.applyBindings(viewModel);
 
 function initMap() {
 
-  viewModel.map = new google.maps.Map(document.getElementById('map'), {
-    center: {
-      lat: 40.782824,
-      lng: -73.965570
-    },
-    zoom: 25,
-    styles: styles
-  });
-
-  viewModel.createMarkers(viewModel.interestingPoints());
+  // Activates knockout.js
+  var viewModel = new AppViewModel();
+  ko.applyBindings(viewModel);
+  viewModel.setupMap();
 }
 
 function googleError() {
   var map = $('#map');
   map.addClass('error');
-  map.html('<table class="error"><tr><td>Error loading neighborhood map.</td></tr></table>');
+  map.html('<table class="error"><tr><td>Error loading neighborhood map</td></tr></table>');
 }

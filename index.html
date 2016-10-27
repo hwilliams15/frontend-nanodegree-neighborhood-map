@@ -9,25 +9,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>New York City Points of Interest</title>
 
-  <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
   <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="css/style.css">
-  <link rel="stylesheet" type="text/css" href="node_modules/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.min.css">
 
-  <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
-
+  <link rel="shortcut icon" href="img/favicon.ico">
 </head>
 
 <body>
-  <div class="main">
+  <main>
     <div class="list-view">
       <div class="input-group filter-input-group">
-        <input type="text" class="form-control filter-input" placeholder="Filter the locations." data-bind="textInput: filterText, event: { keyup: filterLocations}">
-        <span class="input-group-addon center-map-button" title="Center map"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></span>
+        <input type="text" class="form-control filter-input" placeholder="Filter the locations." data-bind="textInput: filterText">
+        <span class="input-group-addon center-map-button" title="Center map" data-bind="click: fitBoundsAndCloseListView"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></span>
       </div>
       <br/>
       <!-- Display the locations -->
-      <ul data-bind="foreach: interestingPoints">
+      <ul data-bind="foreach: filterLocations">
         <li class="list-elem" data-bind="click: $parent.displayInfoWindow">
           <p data-bind="text: title"></p>
         </li>
@@ -35,19 +34,20 @@
     </div>
     <div class="right">
       <div class="header">
-        <span class="glyphicon glyphicon-menu-hamburger hamburger"></span>
+        <span class="glyphicon glyphicon-menu-hamburger hamburger" data-bind="click: adjustListView"></span>
         <div class="input-group mobile-filter-input-group">
           <input type="text" class="form-control filter-input" placeholder="Filter the locations." data-bind="textInput: filterText, event: { keyup: filterLocations}">
-          <span class="input-group-addon center-map-button" title="Center map"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></span>
+          <span class="input-group-addon center-map-button" data-bind="click: fitBounds" title="Center map"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></span>
         </div>
       </div>
       <div id="map"></div>
     </div>
-  </div>
+  </main>
 
-  <script type="text/javascript" src="node_modules/knockout/build/output/knockout-latest.js"></script>
-  <script type="text/javascript" src="js/map-styles.js"></script>
-  <script type="text/javascript" src="js/main.js"></script>
+  <script src="node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="node_modules/knockout/build/output/knockout-latest.js"></script>
+  <script src="js/map-styles.js"></script>
+  <script src="js/main.js"></script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?libraries=places,geometry,drawing&key=AIzaSyCFCdtJItg56GWoWRLYEc2j-2zmoTINuVE&v=3&callback=initMap" onerror="googleError()">
   </script>
 
