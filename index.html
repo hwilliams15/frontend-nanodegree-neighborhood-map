@@ -14,15 +14,17 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.min.css">
 
-  <link rel="shortcut icon" href="img/favicon.ico">
+  <link rel="shortcut icon" href="img/favicon.png">
 </head>
 
 <body>
-  <main>
-    <div class="list-view">
+  <div class="all-content">
+    <aside data-bind="css: { open: asideOpened() }">
       <div class="input-group filter-input-group">
         <input type="text" class="form-control filter-input" placeholder="Filter the locations." data-bind="textInput: filterText">
-        <span class="input-group-addon center-map-button" title="Center map" data-bind="click: fitBoundsAndCloseListView"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></span>
+        <span class="input-group-addon center-map-button" title="Center map" data-bind="click: fitBoundsAndCloseListView">
+          <i class="fa fa-dot-circle-o" aria-hidden="true"></i>
+        </span>
       </div>
       <br/>
       <!-- Display the locations -->
@@ -31,18 +33,18 @@
           <p data-bind="text: title"></p>
         </li>
       </ul>
-    </div>
-    <div class="right">
+    </aside>
+    <main data-bind="css: { minimized: asideOpened() }">
       <div class="header">
-        <span class="glyphicon glyphicon-menu-hamburger hamburger" data-bind="click: adjustListView"></span>
-        <div class="input-group mobile-filter-input-group">
-          <input type="text" class="form-control filter-input" placeholder="Filter the locations." data-bind="textInput: filterText, event: { keyup: filterLocations}">
+        <span class="glyphicon glyphicon-menu-hamburger hamburger" data-bind="click: toggleAsideOpened"></span>
+        <div class="input-group mobile-filter-input-group" data-bind="css: { visible: asideOpened() }">
+          <input type="text" class="form-control filter-input" placeholder="Filter the locations." data-bind="textInput: filterText">
           <span class="input-group-addon center-map-button" data-bind="click: fitBounds" title="Center map"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></span>
         </div>
       </div>
       <div id="map"></div>
-    </div>
-  </main>
+    </main>
+  </div>
 
   <script src="node_modules/jquery/dist/jquery.min.js"></script>
   <script src="node_modules/knockout/build/output/knockout-latest.js"></script>

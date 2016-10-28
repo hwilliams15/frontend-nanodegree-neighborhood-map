@@ -1,9 +1,7 @@
 function AppViewModel() {
   var self = this;
   self.filterText = ko.observable();
-  self.listView = $('.list-view');
-  self.rightContent = $('.right');
-  self.mobileFilter = $('.mobile-filter-input-group');
+  self.asideOpened = ko.observable(false);
 
   self.interestingPoints = ko.observableArray([{
     'title': 'Central Park',
@@ -87,6 +85,10 @@ function AppViewModel() {
     'id': 10
   }]);
 
+  self.toggleAsideOpened = function() {
+    self.asideOpened(!self.asideOpened());
+  };
+
   /*
   Decide which locations should be visible based on the filter text.
   Also filter the markers on the map.
@@ -115,7 +117,7 @@ function AppViewModel() {
       location.marker.setAnimation(null);
     }, 750);
     self.populateInfoWindow(location, self.infoWindow);
-    self.adjustListView();
+    self.toggleAsideOpened();
   };
 
   self.setupMap = function() {
@@ -152,6 +154,7 @@ function AppViewModel() {
     window.onresize = self.fitBounds;
 
   };
+
   /*
   Create the markers for the view model's list of locations
   */
@@ -212,22 +215,17 @@ function AppViewModel() {
       self.infoWindow.setContent('');
       self.infoWindow.marker = marker;
 
-
-      var content = '<div id="title">' + location.title + '</div>' +
-        '<div id="pano">No Street View Found</div>' +
-        '<div id="wiki-content"></div>';
-
-      self.infoWindow.setContent(content);
-      self.infoWindow.open(self.map, marker);
-
-      self.retrieveWikiInfo(location);
-      self.getPanoramaView(marker);
+      self.getContent(location);
 
     }
   };
 
-  //send a request to retrieve the Wikipedia information and add it to the info window
-  self.retrieveWikiInfo = function(location) {
+  // Gets the content for the info window from Wikipedia and Google Street View
+  self.getContent = function(location) {
+
+    var content = '<div id="title">' + location.title + '</div>' +
+      '<div id="pano">No Street View Found</div>';
+
     if (!location.wikiContent) {
       var queryURL = self.createWikipediaUrl(location);
       $.ajax({
@@ -235,7 +233,7 @@ function AppViewModel() {
         dataType: 'jsonp',
         type: 'GET',
         success: function(data) {
-          location.wikiContent = 'Unable to load Wikipedia content.';
+          location.wikiContent = 'Wikipedia data not available';
           try {
             var id = Object.keys(data.query.pages)[0];
             var summary = data.query.pages[id].extract;
@@ -243,17 +241,28 @@ function AppViewModel() {
               location.wikiContent = summary;
             }
           } catch (e) {
-            location.wikiContent = 'Unable to load Wikipedia content';
+            location.wikiContent = 'Wikipedia data not available';
           }
-          $('#wiki-content').text(location.wikiContent);
+          content = content + '<div id="wiki-content">' + location.wikiContent +
+            '<br/><br/><span>Provided by Wikipedia</span></div>';
+          self.infoWindow.setContent(content);
+          self.infoWindow.open(self.map, location.marker);
+          self.getPanoramaView(location.marker);
         },
         error: function() {
           location.wikiContent = 'Unable to load Wikipedia content';
-          $('#wiki-content').text(location.wikiContent);
+          content = content + '<div id="wiki-content">' + location.wikiContent + '</div>';
+          self.infoWindow.setContent(content);
+          self.infoWindow.open(self.map, location.marker);
+          self.getPanoramaView(location.marker);
         }
       });
     } else {
-      $('#wiki-content').text(location.wikiContent);
+      content = content + '<div id="wiki-content">' + location.wikiContent +
+        '<br/><br/><span>Provided by Wikipedia</span></div>';
+      self.infoWindow.setContent(content);
+      self.infoWindow.open(self.map, location.marker);
+      self.getPanoramaView(location.marker);
     }
   };
 
@@ -266,7 +275,7 @@ function AppViewModel() {
 
     //get two sentences from the pages intro
     var queryURL = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + title +
-      '&prop=extracts|images&imlimit=2&exintro=&explaintext=&exsentences=2&format=json';
+      '&prop=extracts&exintro=&explaintext=&exsentences=2&format=json';
     return queryURL;
   };
 
@@ -295,32 +304,29 @@ function AppViewModel() {
         new google.maps.StreetViewPanorama(
           document.getElementById('pano'), panoramaOptions);
       } else {
-        $('#pano').text('No Street View Found');
+
+        var content = '<div id="title">' + marker.location.title + '</div>' +
+          '<div id="pano">No Street View Found</div>' +
+          '<div id="wiki-content">' + marker.location.wikiContent + '</div>';
+        self.infoWindow.setContent(content);
       }
     }
     streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
   };
 
   /*
-  Slide the left handed list view as needed
-  */
-  self.adjustListView = function() {
-    self.listView.toggleClass('open');
-    self.rightContent.toggleClass('minimized');
-    self.mobileFilter.toggleClass('visible');
-  };
-
-  /*
   Recenter the map to fit the markers
   */
   self.fitBounds = function() {
+    self.infoWindow.close();
     self.map.fitBounds(self.bounds);
   };
 
   self.fitBoundsAndCloseListView = function() {
+    self.toggleAsideOpened();
     self.fitBounds();
-    self.adjustListView();
   };
+
 }
 
 function initMap() {

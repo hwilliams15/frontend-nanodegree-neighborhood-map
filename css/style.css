@@ -1,20 +1,27 @@
-html, body, main, .right {
+html,
+body,
+.all-content,
+main {
   height: 100%;
   margin: 0;
   background-color: #000;
 }
-main {
+
+.all-content {
   width: auto;
   flex-grow: 1;
 }
-.right {
+
+main {
   padding-top: 10px;
 }
+
 .header {
   color: orange;
   padding-bottom: 10px
 }
-.list-view {
+
+aside {
   width: 300px;
   position: absolute;
   -webkit-transform: translate(-300px, 0);
@@ -22,23 +29,27 @@ main {
   transition: transform 0.3 ease;
   color: orange;
   padding-top: 10px;
-  font-family: 'Raleway', sans-serif;
+  font-family: "Raleway", sans-serif;
 }
-.list-view.open {
+
+aside.open {
   -webkit-transform: translate(0, 0);
   transform: translate(0, 0);
 }
-.right.minimized {
+
+main.minimized {
   -webkit-transform: translate(300px, 0);
   transform: translate(300px, 0);
   width: auto;
   flex-grow: 1;
   transition: transform 0.3s ease;
 }
+
 #map {
   height: 100%;
   width: 100%;
 }
+
 .error {
   color: red;
   text-align: center;
@@ -47,33 +58,40 @@ main {
   height: 100%;
   font-size: 26px;
 }
+
 .hamburger {
   font-size: 2em;
   vertical-align: middle;
   margin-left: 5px;
 }
+
 .hamburger:hover {
   color: #31b0d5;
   cursor: pointer;
 }
+
 ul {
   list-style-type: none;
   padding: 0;
 }
+
 li {
   font-size: 16px;
   padding-top: 5px;
   padding-bottom: 5px;
 }
+
 li:hover {
   cursor: pointer;
   background-color: white;
   color: black;
 }
+
 .list-elem p {
   padding-left: 20px;
   margin: 0;
 }
+
 .center-map-button {
   top: 0px;
   background-color: white;
@@ -81,15 +99,18 @@ li:hover {
   border-color: #3b3d3b;
   cursor: pointer;
 }
+
 .center-map-button:hover {
   background-color: #31b0d5;
   color: white;
 }
+
 .filter-input-group {
   width: 95%;
   padding-left: 10px;
   margin: 0 auto;
 }
+
 .mobile-filter-input-group {
   width: 80%;
   display: inline-table;
@@ -97,49 +118,63 @@ li:hover {
   margin: 0 auto;
   vertical-align: middle;
 }
+
 .mobile-filter-input-group.visible {
   display: none;
 }
+
 .filter-input {
   background-color: #000;
   border-color: #3b3d3b;
 }
+
 #pano {
   width: 200px;
   height: 200px;
 }
+
 #wiki-content {
   width: 200px;
 }
+
+#wiki-content span {
+  font-style: italic;
+}
+
 
 /*
 Don't shift the list view when larger than 600px
 */
 
 @media (min-width: 600px) {
-  .list-view {
+
+  aside {
     position: relative;
     -webkit-transform: translate(0, 0);
     transform: translate(0, 0);
   }
-  .right {
-    width: auto;
-    flex-grow: 1;
-    transition: transform 0.3s ease;
-  }
-  .list-view.open {
-    position: relative;
-    -webkit-transform: translate(0, 0);
-    transform: translate(0, 0);
-  }
-  .right.minimized {
-    -webkit-transform: translate(0, 0);
-    transform: translate(0, 0);
-    width: auto;
-    flex-grow: 1;
-    transition: transform 0.3s ease;
-  }
+
   main {
+    width: auto;
+    flex-grow: 1;
+    transition: transform 0.3s ease;
+  }
+
+  aside.open {
+    position: relative;
+    -webkit-transform: translate(0, 0);
+    transform: translate(0, 0);
+  }
+
+  main.minimized {
+    -webkit-transform: translate(0, 0);
+    transform: translate(0, 0);
+    width: auto;
+    flex-grow: 1;
+    transition: transform 0.3s ease;
+  }
+
+  .all-content {
     width: auto;
     flex-grow: 1;
     display: -webkit-flex;
@@ -147,15 +182,19 @@ Don't shift the list view when larger than 600px
     -webkit-flex-flow: row nowrap;
     flex-flow: row nowrap;
   }
+
   .hamburger {
     display: none;
   }
+
   .filter-input-group {
     width: 95%;
     padding-left: 10px;
     margin: 0 auto;
   }
+
   .mobile-filter-input-group {
     display: none;
   }
+
 }
