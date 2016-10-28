@@ -1,4 +1,5 @@
 # Neighborhood Map
+This application uses Google Maps API, Google Street View API, and MediaWiki API to show information about interesting locations in New York City.
 
 ## Basic installation
 * Run `npm install` in the project root directory.
